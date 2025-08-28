@@ -1,144 +1,160 @@
 <header class="site-header">
 
-  <!-- Logomarca -->
-  <h1 class="header__logo">
-    {% if section.settings.logo != blank %}
-      <a href="{{ routes.root_url }}">
-        <img src="{{ section.settings.logo | img_url: '200x' }}" alt="{{ shop.name }}">
-      </a>
-    {% else %}
-      {{ shop.name | link_to: routes.root_url }}
-    {% endif %}
-  </h1>
-
-  <!-- Data Atual + Promoção + Cronômetro -->
+  <!-- Barra Superior (promo/frete/localização) -->
   <div class="header__topbar">
-    <span class="header__date">{{ "now" | date: "%d/%m/%Y" }}</span>
-    <span class="header__promo">{{ section.settings.promo_text }}</span>
-    <span class="header__timer" id="flash-sale-timer" data-endtime="{{ section.settings.promo_timer }}">
-      Oferta termina em: <strong id="timer-countdown"></strong>
-    </span>
+    <div class="container">
+      <span class="header__location">
+        {{ 'icon-location.svg' | inline_asset_content }}
+        {{ section.settings.promo_text }}
+      </span>
+    </div>
   </div>
 
-  <!-- Barra de Navegação -->
+  <!-- Linha Principal: Logo + Busca + Ícones -->
+  <div class="header__main">
+    <div class="container header__main-wrapper">
+
+      <!-- Logomarca -->
+      <div class="header__logo">
+        {% if section.settings.logo != blank %}
+          <a href="{{ routes.root_url }}">
+            <img src="{{ section.settings.logo | img_url: '200x' }}" alt="{{ shop.name }}">
+          </a>
+        {% else %}
+          <h1>{{ shop.name | link_to: routes.root_url }}</h1>
+        {% endif %}
+      </div>
+
+      <!-- Barra de Pesquisa -->
+      <div class="header__search">
+        <form action="{{ routes.search_url }}" method="get" role="search">
+          <input type="search" name="q" placeholder="Search..." aria-label="Buscar">
+          <button type="submit">
+            {{ 'icon-search.svg' | inline_asset_content }}
+          </button>
+        </form>
+      </div>
+
+      <!-- Ícones -->
+      <div class="header__icons">
+        <!-- Rastreamento -->
+        <a href="/pages/rastrear-pedido" title="Rastrear Pedido">
+          {{ 'icon-track.svg' | inline_asset_content }}
+        </a>
+        <!-- Conta -->
+        {% if shop.customer_accounts_enabled %}
+          {% if customer %}
+            <a href="{{ routes.account_url }}" title="Minha Conta">
+              {{ 'icon-account.svg' | inline_asset_content }}
+            </a>
+          {% else %}
+            <a href="{{ routes.account_login_url }}" title="Entrar">
+              {{ 'icon-account.svg' | inline_asset_content }}
+            </a>
+          {% endif %}
+        {% endif %}
+        <!-- Carrinho -->
+        <a href="{{ routes.cart_url }}" class="header__cart" title="Carrinho">
+          {{ 'icon-cart.svg' | inline_asset_content }}
+          {% if cart.item_count > 0 %}
+            <sup>{{ cart.item_count }}</sup>
+          {% endif %}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Menu Inferior -->
   <nav class="header__menu">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
+    <div class="container">
+      <ul>
+        <li class="menu-icon">{{ 'icon-menu.svg' | inline_asset_content }}</li>
+        {% for link in section.settings.menu.links %}
+          <li>{{ link.title | link_to: link.url }}</li>
+        {% endfor %}
+      </ul>
+    </div>
   </nav>
-
-  <!-- Barra de Pesquisa -->
-  <div class="header__search">
-    <form action="{{ routes.search_url }}" method="get" role="search">
-      <input type="search" name="q" placeholder="Buscar produtos..." aria-label="Buscar">
-      <button type="submit">
-        {{ 'icon-search.svg' | inline_asset_content }}
-      </button>
-    </form>
-  </div>
-
-  <!-- Ícones -->
-  <div class="header__icons">
-
-    <!-- Rastreamento -->
-    <a href="/pages/rastrear-pedido">
-      {{ 'icon-track.svg' | inline_asset_content }}
-    </a>
-
-    <!-- Idioma / País -->
-    <a href="/localization">
-      {{ 'icon-globe.svg' | inline_asset_content }}
-    </a>
-
-    <!-- Conta / Login -->
-    {% if shop.customer_accounts_enabled %}
-      {% if customer %}
-        <a href="{{ routes.account_url }}">
-          {{ 'icon-account.svg' | inline_asset_content }}
-          <span class="username">{{ customer.first_name }}</span>
-        </a>
-      {% else %}
-        <a href="{{ routes.account_login_url }}">
-          {{ 'icon-account.svg' | inline_asset_content }}
-        </a>
-      {% endif %}
-    {% endif %}
-
-    <!-- Carrinho -->
-    <a href="{{ routes.cart_url }}" class="header__cart">
-      {{ 'icon-cart.svg' | inline_asset_content }}
-      {% if cart.item_count > 0 %}
-        <sup>{{ cart.item_count }}</sup>
-      {% endif %}
-    </a>
-  </div>
-
 </header>
 
-<!-- Script Cronômetro -->
-<script>
-document.addEventListener("DOMContentLoaded", function(){
-  var timerElement = document.getElementById("timer-countdown");
-  var timerContainer = document.getElementById("flash-sale-timer");
-  if(timerContainer){
-    var endTime = timerContainer.dataset.endtime;
-    if(endTime){
-      var countDownDate = new Date(endTime).getTime();
-      var x = setInterval(function(){
-        var now = new Date().getTime();
-        var distance = countDownDate - now;
-        if(distance < 0){
-          clearInterval(x);
-          timerElement.innerHTML = "Expirado";
-        } else {
-          var hours = Math.floor((distance % (1000*60*60*24)) / (1000*60*60));
-          var minutes = Math.floor((distance % (1000*60*60)) / (1000*60));
-          var seconds = Math.floor((distance % (1000*60)) / 1000);
-          timerElement.innerHTML = hours + "h " + minutes + "m " + seconds + "s";
-        }
-      }, 1000);
-    }
-  }
-});
-</script>
-
 {% stylesheet %}
+/* ===== Estrutura Geral ===== */
 .site-header {
+  font-family: inherit;
+  color: white;
+}
+
+/* Barra superior */
+.header__topbar {
+  background: #0a2a47;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 0.3rem 1rem;
+}
+.header__topbar .container {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+}
+.header__location {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.header__location svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Linha principal */
+.header__main {
+  background: #00264d;
+  padding: 0.8rem 1rem;
+}
+.header__main-wrapper {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.5rem 1rem;
 }
-
 .header__logo img {
   max-height: 50px;
 }
 
-.header__topbar {
+/* Busca */
+.header__search {
+  flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.85rem;
-  color: var(--color-foreground);
+  justify-content: center;
 }
-
-.header__menu {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
 .header__search form {
   display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  width: 100%;
+  max-width: 600px;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
 }
 .header__search input {
-  padding: 0.25rem 0.5rem;
+  flex: 1;
+  border: none;
+  padding: 0.6rem;
+  font-size: 1rem;
+  outline: none;
+}
+.header__search button {
+  background: #00e676;
+  border: none;
+  padding: 0 1rem;
+  cursor: pointer;
+}
+.header__search button svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  fill: #fff;
 }
 
+/* Ícones */
 .header__icons {
   display: flex;
   align-items: center;
@@ -153,30 +169,68 @@ document.addEventListener("DOMContentLoaded", function(){
 }
 .header__cart sup {
   position: absolute;
-  top: -0.5rem;
-  right: -0.5rem;
-  background: red;
-  color: white;
+  top: -0.4rem;
+  right: -0.6rem;
+  background: #00e676;
+  color: #000;
   border-radius: 50%;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.7rem;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.75rem;
+  font-weight: bold;
 }
 
+/* Menu inferior */
+.header__menu {
+  background: #00264d;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+.header__menu .container {
+  display: flex;
+  justify-content: center;
+}
+.header__menu ul {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+  padding: 0.8rem 0;
+  margin: 0;
+}
+.header__menu a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 600;
+}
+.header__menu .menu-icon svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/* Responsividade */
 @media (max-width: 768px) {
-  .site-header {
+  .header__main-wrapper {
     flex-direction: column;
     align-items: flex-start;
   }
-  .header__menu {
-    justify-content: center;
+  .header__search {
+    order: 2;
     width: 100%;
+  }
+  .header__icons {
+    order: 3;
+    justify-content: flex-end;
+    width: 100%;
+  }
+  .header__menu ul {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "Cabeçalho Avançado",
+  "name": "Cabeçalho Estilo Premium",
   "settings": [
     {
       "type": "image_picker",
@@ -186,14 +240,8 @@ document.addEventListener("DOMContentLoaded", function(){
     {
       "type": "text",
       "id": "promo_text",
-      "label": "Texto da promoção",
-      "default": "Frete grátis em pedidos acima de R$199!"
-    },
-    {
-      "type": "text",
-      "id": "promo_timer",
-      "label": "Data final da oferta (YYYY-MM-DDTHH:MM:SS)",
-      "default": "2025-12-31T23:59:59"
+      "label": "Texto da barra superior",
+      "default": "Frete grátis para todo o Brasil!"
     },
     {
       "type": "link_list",
