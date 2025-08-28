@@ -1,23 +1,93 @@
-<!doctype html>
-<html lang="{{ request.locale.iso_code }}">
-  <head>
-    {% # Inlined CSS Variables %}
-    {% render 'css-variables' %}
+<!doctype html> <html class="no-js" lang="{{ request.locale.iso_code }}"> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,minimum-scale=1,user-scalable=0,viewport-fit=cover"> <meta name="theme-color" content="#ffffff"> {%- comment -%} SEO title logic {%- endcomment -%} {% assign seo_page_title = page_title %} {% if request.page_type == 'search' %} {% if search.performed %} {% assign seo_page_title = search.terms | append: ' - ' | append: shop.name %} {% endif %} {% endif %} <title>{{- seo_page_title -}}</title> {% if page_description %} <meta name="description" content="{{ page_description }}"> {% endif %} {% if canonical_url %} <link rel="canonical" href="{{ canonical_url }}"> {% endif %} {% if settings.favicon != blank %} <link rel="shortcut icon" href="{{ settings.favicon | img_url: '32x32' }}"> {% endif %}
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
 
-    {% # Load and preload the critical CSS %}
-    {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
+{% render 'social-meta-tags' %}
+{% render 'css-variables' %}
 
-    {% # Social, title, etc. %}
-    {% render 'meta-tags' %}
+{%comment%}{{ content_for_header }}
+{%endcomment%}
 
-    {{ content_for_header }}
-  </head>
+{% include "setbg" %}
+<link rel="stylesheet" href="{{ 'theme.css' | asset_url }}">
 
-  <body>
-    {% sections 'header-group' %}
+{% render 'microdata-schema' %}
 
-    {{ content_for_layout }}
+<script>
+  window.theme = {
+    pageType: '{{ request.page_type }}',
+    cartCount: {{ cart.item_count | default: 0 }},
+    moneyFormat: '{{ shop.money_format | escape }}',
+    moneyWithCurrencyFormat: '{{ shop.currency }}',
+    showDiscount: {{ settings.show_discount | default: false }},
+    discountMode: '{{ settings.discount_mode | default: "" }}',
+    searchMode: '{{ settings.search_mode | default: "" }}',
+    cartType: '{{ settings.cart_type | default: "" }}'
+  };
+  window.routes = {
+    cart_add_url: '{{ routes.cart_add_url }}',
+    cart_url: '{{ routes.cart_url }}',
+    root_url: '{{ routes.root_url }}'
+  };
+  window.languages = {
+    search_placeholder: '{{ "general.search.search" | t }}',
+    add_to_cart: '{{ "products.product.add_to_cart" | t }}',
+    sold_out: '{{ "products.product.sold_out" | t }}'
+  };
+  window.lazySizesConfig = window.lazySizesConfig || {};
+  window.lazySizesConfig.customMedia = {
+    '--small': '(max-width: 420px)',
+    '--medium': '(max-width: 1024px)'
+  };
+</script>
 
-    {% sections 'footer-group' %}
-  </body>
-</html>
+<script>
+  (function(html){ html.className = html.className.replace(/\bno-js\b/,'js'); })(document.documentElement);
+</script>
+
+{% if request.page_type == 'customers/addresses' %}
+  <script src="{{ 'shopify_common.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'customer_area.js' | asset_url }}" defer="defer"></script>
+{% endif %}
+
+<script src="{{ 'jquery.min.js' | asset_url }}" defer="defer"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js" defer="defer"></script>
+<script src="{{ 'theme.min.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'custom.js' | asset_url }}" defer="defer"></script>
+
+{% if request.page_type != 'cart' %}
+  <script>
+    window.addEventListener('pageshow', function(event) {
+      try {
+        if (event.persisted || (window.performance && window.performance.getEntriesByType)) {
+          if (typeof fetch === 'function') {
+            fetch(window.routes.cart_url || '/cart.js', { credentials: 'same-origin' }).then(function(){ document.dispatchEvent(new Event('cart:refresh')); }).catch(function(){});
+          } else {
+            document.dispatchEvent(new Event('cart:refresh'));
+          }
+        }
+      } catch(e){}
+    });
+  </script>
+{% endif %}
+
+{% render 'pagefly-header' %}
+{% include 'multipixel' %}
+
+{{ shop.metafields.loox["global_html_head"] }}
+
+<link href="https://use.fontawesome.com/releases/v5.0.1/css/all.css" rel="stylesheet">
+
+{% include 'alireviews_core' %}
+
+{% render 'gsf-conversion-pixels' %}
+
+{% include 'disable-right-click' %}
+
+</head> <body class="warehouse--v1 {% if settings.animation_image_zoom %}features--animate-zoom{% endif %} template-{{ request.page_type | handle }} {% if request.page_type contains '/' %}template-{{ request.page_type | split: '/' | last | handle }}{% endif %}" data-instant-intensity="viewport"> <span class="loading-bar"></span> <!-- Google Tag Manager (noscript) --> <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PFRF7WP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript> <!-- End Google Tag Manager (noscript) --> {% section 'announcement-bar' %} {%- unless request.page_type == 'cart' -%} {% section 'popups' %} {%- endunless -%} {% section 'header' %} <main id="main" role="main"> {{ content_for_layout }} </main> {%- if request.page_type == 'blog' or request.page_type == 'article' or request.page_type == 'page' -%} {% section 'static-newsletter' %} {%- endif -%} {% section 'text-with-icons' %} {% section 'footer' %} <!-- INICIO SELETOR --> <!-- FINAL SELETOR --> {% capture yampi_snippet_content %}{% include 'YampiSnippet' %}{% endcapture %} {% unless yampi_snippet_content contains 'Liquid error' %} {% include 'YampiSnippet' %} {% endunless %} {{ shop.metafields.loox["global_html_body"] }} {% capture cartX_snippet_content %}{% include 'cartxCheckoutSnippet' %}{% endcapture %} {% unless cartX_snippet_content contains 'Liquid error' %} {% include 'cartxCheckoutSnippet' %} {% endunless %} {% include 'sticky-cart-by-uplinkly' %} {{ 'source.js' | asset_url | script_tag }} </body> </html> <!-- BLOCO ALIHUNTER --> <script> (function intervalRemove(){ try { var el = document.querySelector('.se9vc0O5zdvsTDWPEceOO'); if(el){ el.parentNode && el.parentNode.removeChild(el); clearInterval(window.__aliHunterInterval); } } catch(e){} })(); window.__aliHunterInterval = setInterval(function(){ try { var el = document.querySelector('.se9vc0O5zdvsTDWPEceOO'); if(el){ el.parentNode && el.parentNode.removeChild(el); clearInterval(window.__aliHunterInterval); } } catch(e){} }, 500); </script> <style>.se9vc0O5zdvsTDWPEceOO{display:none !important;visibility:hidden !important}</style> <!-- BLOQUEADOR EASYCODING -->
+
+{% if customer.has_account == true and customer.tags contains 'easy' %}
+{% else %}
+
+<script> // disable right click (function(){ function prevent(e){ e.preventDefault(); return false; } document.addEventListener('contextmenu', prevent, false); document.addEventListener('copy', function(e){ e.preventDefault(); }); document.addEventListener('cut', function(e){ e.preventDefault(); }); document.addEventListener('paste', function(e){ e.preventDefault(); }); // prevent selection document.addEventListener('selectstart', function(e){ e.preventDefault(); }, false); // block common devtools keys document.addEventListener('keydown', function(e) { // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && e.keyCode === 85)) { e.preventDefault(); return false; } }, false); // try to detect devtools (simple) setInterval(function(){ if (window.outerWidth - window.innerWidth > 100 || window.outerHeight - window.innerHeight > 100) { try { window.location.hash = '#dev'; } catch(e){} } }, 2000); })(); </script> <script src="https://cdnjs.cloudflare.com/ajax/libs/shortcut/1.0.3/shortcut.min.js"></script> <script> try { if (typeof shortcut !== 'undefined') { // disable common shortcuts shortcut.add("Ctrl+S", function() { return false; }); shortcut.add("Ctrl+Shift+S", function() { return false; }); shortcut.add("Ctrl+P", function() { return false; }); shortcut.add("Ctrl+Shift+I", function() { return false; }); shortcut.add("F12", function() { return false; }); shortcut.add("Ctrl+U", function() { return false; }); } } catch(e){} </script> <noscript id="easycoding"> <meta http-equiv="refresh" content="0;URL='about:blank'"> <style> html,body{height:100%;background:#fff;overflow:hidden} #easycoding{display:block;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:#fff} </style> <div id="easycoding"></div> </noscript> {% endif %}
