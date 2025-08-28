@@ -1,144 +1,65 @@
-{%- comment -%}
-HEADER PRINCIPAL DO E-COMMERCE
-Desenvolvido em .liquid para Shopify
-Funcionalidades:
-- Logomarca dinâmica
-- Data atual
-- Espaço de anúncio / promoção
-- Cronômetro editável
-- Barra de pesquisa
-- Ícones de rastreamento, idioma, login e carrinho
-- Menu de navegação principal
-Responsivo e escalável
-{%- endcomment -%}
+<header>
+  <h2 class="header__title">
+    {{ shop.name | link_to: routes.root_url }}
+  </h2>
 
-<header class="site-header">
-
-  <!-- Topo Informativo -->
-  <div class="header-top">
-    <div class="container header-top__content">
-
-      <!-- Data Atual -->
-      <div class="header-date">
-        {{ "now" | date: "%d/%m/%Y" }}
-      </div>
-
-      <!-- Espaço para anúncio/promos -->
-      <div class="header-promo">
-        {{ section.settings.promo_text }}
-      </div>
-
-      <!-- Cronômetro de Ofertas Relâmpago -->
-      <div class="header-timer" id="flash-sale-timer" 
-           data-endtime="{{ section.settings.promo_timer }}">
-        <span>Oferta termina em: <span id="timer-countdown"></span></span>
-      </div>
-
-      <!-- Ícones utilitários -->
-      <div class="header-icons">
-        <!-- Rastreamento de pedidos -->
-        <a href="/pages/rastrear-pedido" class="icon-track">📦</a>
-        
-        <!-- Seleção de país/idioma -->
-        <a href="/localization" class="icon-lang">🌐</a>
-
-        <!-- Login do usuário -->
-        {% if customer %}
-          <a href="/account" class="icon-login">👤 {{ customer.first_name }}</a>
-        {% else %}
-          <a href="/account/login" class="icon-login">👤 Entrar</a>
-        {% endif %}
-
-        <!-- Carrinho com contador -->
-        <a href="/cart" class="icon-cart">
-          🛒 <span class="cart-count">{{ cart.item_count }}</span>
-        </a>
-      </div>
-    </div>
+  <div class="header__menu">
+    {% for link in section.settings.menu.links %}
+      {{ link.title | link_to: link.url }}
+    {% endfor %}
   </div>
 
-  <!-- Área principal do cabeçalho -->
-  <div class="header-main">
-    <div class="container header-main__content">
+  <div class="header__icons">
+    {% if shop.customer_accounts_enabled %}
+      {{ 'icon-account.svg' | inline_asset_content | link_to: routes.account_url }}
+    {% endif %}
 
-      <!-- Logomarca -->
-      <div class="site-logo">
-        {% if section.settings.logo != blank %}
-          <a href="{{ routes.root_url }}">
-            <img src="{{ section.settings.logo | img_url: '200x' }}" alt="{{ shop.name }}">
-          </a>
-        {% else %}
-          <h1><a href="{{ routes.root_url }}">{{ shop.name }}</a></h1>
-        {% endif %}
-      </div>
+    <a href="{{ routes.cart_url }}">
+      {% if cart.item_count > 0 %}
+        <sup>{{ cart.item_count }}</sup>
+      {% endif %}
 
-      <!-- Barra de Pesquisa -->
-      <div class="site-search">
-        <form action="{{ routes.search_url }}" method="get" role="search">
-          <input type="search" name="q" placeholder="Buscar produtos..." aria-label="Buscar">
-          <button type="submit">🔍</button>
-        </form>
-      </div>
-
-      <!-- Menu de Navegação -->
-      <nav class="site-nav" role="navigation">
-        <ul>
-          <li><a href="/collections/all">Categorias</a></li>
-          <li><a href="/pages/sobre-nos">Sobre nós</a></li>
-          <li><a href="/pages/politicas">Políticas e privacidade</a></li>
-          <li><a href="/collections/novidades">Novidades</a></li>
-        </ul>
-      </nav>
-    </div>
+      {{ 'icon-cart.svg' | inline_asset_content }}
+    </a>
   </div>
 </header>
 
-<!-- Script para cronômetro de ofertas -->
-<script>
-document.addEventListener("DOMContentLoaded", function(){
-  var timerElement = document.getElementById("timer-countdown");
-  var endTime = document.getElementById("flash-sale-timer").dataset.endtime;
-  
-  if(endTime){
-    var countDownDate = new Date(endTime).getTime();
-    var x = setInterval(function(){
-      var now = new Date().getTime();
-      var distance = countDownDate - now;
-
-      if(distance < 0){
-        clearInterval(x);
-        timerElement.innerHTML = "Expirado";
-      } else {
-        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000*60*60));
-        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000*60));
-        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        timerElement.innerHTML = hours + "h " + minutes + "m " + seconds + "s";
-      }
-    }, 1000);
+{% stylesheet %}
+  header {
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-});
-</script>
+  header a {
+    position: relative;
+    text-decoration: none;
+    color: var(--color-foreground);
+  }
+  header a sup {
+    position: absolute;
+    left: 100%;
+    overflow: hidden;
+    max-width: var(--page-margin);
+  }
+  header svg {
+    width: 2rem;
+  }
+  header .header__menu,
+  header .header__icons {
+    display: flex;
+    gap: 1rem;
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
-  "name": "Cabeçalho personalizado",
+  "name": "t:general.header",
   "settings": [
     {
-      "type": "image_picker",
-      "id": "logo",
-      "label": "Logomarca"
-    },
-    {
-      "type": "text",
-      "id": "promo_text",
-      "label": "Texto da promoção",
-      "default": "Frete grátis em pedidos acima de R$199!"
-    },
-    {
-      "type": "text",
-      "id": "promo_timer",
-      "label": "Data e hora final da oferta (ex: 2025-09-01T23:59:59)",
-      "default": "2025-12-31T23:59:59"
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:labels.menu"
     }
   ]
 }
