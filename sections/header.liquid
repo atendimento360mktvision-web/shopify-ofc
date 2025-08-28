@@ -1,263 +1,65 @@
-{% comment %}
-  --------------------------------------------------------------------------------------------------------------------
-  ARQUIVO DA SEÇÃO DO CABEÇALHO (header.liquid)
-  --------------------------------------------------------------------------------------------------------------------
-  Este código cria um cabeçalho completo e dinâmico.
-  - Totalmente editável pelo painel do Shopify.
-  - Inclui barra de anúncios, cronômetro, data, busca, menus e ícones.
-  - Estruturado para ser responsivo (requer CSS externo).
-  - Desenvolvido seguindo as melhores práticas da Shopify.
-  --------------------------------------------------------------------------------------------------------------------
-{% endcomment %}
+<header>
+  <h2 class="header__title">
+    {{ shop.name | link_to: routes.root_url }}
+  </h2>
 
-{% comment %} ======================================================================= {% endcomment %}
-{% comment %} INÍCIO DA ESTRUTURA HTML E LÓGICA LIQUID DO CABEÇALHO {% endcomment %}
-{% comment %} ======================================================================= {% endcomment %}
-
-<header id="site-header" class="site-header" role="banner">
-
-  {% comment %} ------------------------------------------------------------------- {% endcomment %}
-  {% comment %} BARRA SUPERIOR: Anúncios, Cronômetro e Data {% endcomment %}
-  {% comment %} ------------------------------------------------------------------- {% endcomment %}
-  <div class="header-top-bar">
-    <div class="page-width">
-
-      {% comment %} Exibe a data atual via JavaScript {% endcomment %}
-      {% if section.settings.show_date %}
-        <div id="current-date" class="header-top-bar__date"></div>
-      {% endif %}
-      
-      {% comment %} Bloco do anúncio/promoção {% endcomment %}
-      {% if section.settings.announcement_text != blank %}
-        <div class="header-top-bar__announcement">
-          {% if section.settings.announcement_link != blank %}
-            <a href="{{ section.settings.announcement_link }}">{{ section.settings.announcement_text | escape }}</a>
-          {% else %}
-            <span>{{ section.settings.announcement_text | escape }}</span>
-          {% endif %}
-        </div>
-      {% endif %}
-
-      {% comment %} Bloco do cronômetro de ofertas {% endcomment %}
-      {% if section.settings.countdown_end_date != blank %}
-        <div id="countdown-timer" class="header-top-bar__countdown" data-end-date="{{ section.settings.countdown_end_date }}">
-          </div>
-      {% endif %}
-
-    </div>
+  <div class="header__menu">
+    {% for link in section.settings.menu.links %}
+      {{ link.title | link_to: link.url }}
+    {% endfor %}
   </div>
 
-  {% comment %} ------------------------------------------------------------------- {% endcomment %}
-  {% comment %} BARRA PRINCIPAL: Logo, Busca, Ícones e Login {% endcomment %}
-  {% comment %} ------------------------------------------------------------------- {% endcomment %}
-  <div class="header-main-bar">
-    <div class="page-width">
-      
-      {% comment %} Logomarca da loja {% endcomment %}
-      <div class="header-main-bar__logo">
-        <a href="{{ routes.root_url }}">
-          {% if section.settings.logo %}
-            <img 
-              src="{{ section.settings.logo | image_url: width: 200 }}" 
-              alt="{{ shop.name | escape }}" 
-              width="200"
-              loading="lazy">
-          {% else %}
-            <span>{{ shop.name | escape }}</span>
-          {% endif %}
-        </a>
-      </div>
+  <div class="header__icons">
+    {% if shop.customer_accounts_enabled %}
+      {{ 'icon-account.svg' | inline_asset_content | link_to: routes.account_url }}
+    {% endif %}
 
-      {% comment %} Barra de Pesquisa {% endcomment %}
-      <div class="header-main-bar__search">
-        <form action="{{ routes.search_url }}" method="get" role="search">
-          <input type="search" name="q" placeholder="Buscar produtos...">
-          <button type="submit" aria-label="Pesquisar">
-            {% comment %} Ícone de Lupa (SVG) {% endcomment %}
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          </button>
-        </form>
-      </div>
+    <a href="{{ routes.cart_url }}">
+      {% if cart.item_count > 0 %}
+        <sup>{{ cart.item_count }}</sup>
+      {% endif %}
 
-      {% comment %} Ícones de Ação e Login {% endcomment %}
-      <div class="header-main-bar__icons">
-
-        {% comment %} Rastreamento de Pedidos {% endcomment %}
-        {% if section.settings.tracking_page_link != blank %}
-          <a href="{{ section.settings.tracking_page_link }}" class="icon-link" aria-label="Rastrear Pedido">
-            {% comment %} Ícone de Rastreamento (SVG) {% endcomment %}
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
-          </a>
-        {% endif %}
-        
-        {% comment %} Seletor de País/Idioma (Shopify Markets) {% endcomment %}
-        {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
-          <div class="icon-link">
-             {% render 'localization-form' %}
-          </div>
-        {%- endif -%}
-
-        {% comment %} Login do Usuário {% endcomment %}
-        <div class="icon-link">
-          {% if customer %}
-            <a href="{{ routes.account_url }}" aria-label="Minha Conta">Olá, {{ customer.first_name }}</a>
-          {% else %}
-            <a href="{{ routes.account_login_url }}" aria-label="Login ou Registro">
-              {% comment %} Ícone de Usuário (SVG) {% endcomment %}
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            </a>
-          {% endif %}
-        </div>
-
-        {% comment %} Carrinho de Compras {% endcomment %}
-        <a href="{{ routes.cart_url }}" class="icon-link cart-icon" aria-label="Carrinho de Compras">
-          {% comment %} Ícone de Carrinho (SVG) {% endcomment %}
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-          <span class="cart-item-count">{{ cart.item_count }}</span>
-        </a>
-      </div>
-      
-    </div>
+      {{ 'icon-cart.svg' | inline_asset_content }}
+    </a>
   </div>
-
-  {% comment %} ------------------------------------------------------------------- {% endcomment %}
-  {% comment %} BARRA DE NAVEGAÇÃO: Menu Principal {% endcomment %}
-  {% comment %} ------------------------------------------------------------------- {% endcomment %}
-  <nav class="header-navigation-bar" role="navigation">
-    <div class="page-width">
-      <ul class="nav-menu">
-        {% comment %} Loop para renderizar os links do menu selecionado no painel {% endcomment %}
-        {% for link in section.settings.main_menu.links %}
-          <li class="nav-menu__item">
-            <a href="{{ link.url }}" class="nav-menu__link">{{ link.title }}</a>
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-  </nav>
-
 </header>
 
-{% comment %} ======================================================================= {% endcomment %}
-{% comment %} INÍCIO DO JAVASCRIPT PARA FUNCIONALIDADES DINÂMICAS {% endcomment %}
-{% comment %} ======================================================================= {% endcomment %}
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    
-    // --- Lógica para exibir a data atual ---
-    const dateElement = document.getElementById('current-date');
-    if (dateElement) {
-      const today = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      // Altere 'pt-BR' para o locale desejado
-      dateElement.textContent = today.toLocaleDateString('pt-BR', options);
-    }
+{% stylesheet %}
+  header {
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header a {
+    position: relative;
+    text-decoration: none;
+    color: var(--color-foreground);
+  }
+  header a sup {
+    position: absolute;
+    left: 100%;
+    overflow: hidden;
+    max-width: var(--page-margin);
+  }
+  header svg {
+    width: 2rem;
+  }
+  header .header__menu,
+  header .header__icons {
+    display: flex;
+    gap: 1rem;
+  }
+{% endstylesheet %}
 
-    // --- Lógica para o cronômetro de ofertas ---
-    const countdownElement = document.getElementById('countdown-timer');
-    if (countdownElement) {
-      const endDateString = countdownElement.getAttribute('data-end-date');
-      const endDate = new Date(endDateString).getTime();
-
-      const countdownInterval = setInterval(function() {
-        const now = new Date().getTime();
-        const distance = endDate - now;
-
-        // Calcula dias, horas, minutos e segundos
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-        // Monta a string de exibição
-        countdownElement.innerHTML = `Oferta termina em: <strong>${days}d ${hours}h ${minutes}m ${seconds}s</strong>`;
-
-        // Se o tempo acabar, exibe uma mensagem
-        if (distance < 0) {
-          clearInterval(countdownInterval);
-          countdownElement.innerHTML = "{{ section.settings.countdown_expired_text | escape }}";
-        }
-      }, 1000);
-    }
-  });
-</script>
-
-{% comment %} ======================================================================= {% endcomment %}
-{% comment %} INÍCIO DO SCHEMA: CONFIGURAÇÕES DO PAINEL DO SHOPIFY {% endcomment %}
-{% comment %} ======================================================================= {% endcomment %}
 {% schema %}
 {
-  "name": "Cabeçalho",
-  "class": "section-header",
+  "name": "t:general.header",
   "settings": [
     {
-      "type": "header",
-      "content": "Configurações da Logomarca"
-    },
-    {
-      "type": "image_picker",
-      "id": "logo",
-      "label": "Imagem da Logomarca",
-      "info": "Se nenhuma imagem for selecionada, o nome da loja será exibido."
-    },
-    {
-      "type": "header",
-      "content": "Barra Superior"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_date",
-      "label": "Exibir data atual",
-      "default": true
-    },
-    {
-      "type": "text",
-      "id": "announcement_text",
-      "label": "Texto do anúncio",
-      "default": "Frete grátis para todo o Brasil!"
-    },
-    {
-      "type": "url",
-      "id": "announcement_link",
-      "label": "Link do anúncio (opcional)"
-    },
-    {
-      "type": "header",
-      "content": "Cronômetro de Ofertas"
-    },
-    {
-      "type": "text",
-      "id": "countdown_end_date",
-      "label": "Data final da oferta",
-      "info": "Use o formato: AAAA-MM-DDTHH:MM:SS (ex: 2025-12-31T23:59:59)"
-    },
-    {
-      "type": "text",
-      "id": "countdown_expired_text",
-      "label": "Texto quando a oferta expirar",
-      "default": "Oferta encerrada!"
-    },
-    {
-      "type": "header",
-      "content": "Navegação e Ícones"
-    },
-    {
       "type": "link_list",
-      "id": "main_menu",
-      "label": "Menu de navegação principal",
-      "info": "Selecione o menu a ser exibido no cabeçalho."
-    },
-    {
-      "type": "url",
-      "id": "tracking_page_link",
-      "label": "Link para a página de rastreamento"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_country_selector",
-      "label": "Habilitar seletor de País/Região",
-      "default": true,
-      "info": "Requer configuração do Shopify Markets."
+      "id": "menu",
+      "label": "t:labels.menu"
     }
   ]
 }
