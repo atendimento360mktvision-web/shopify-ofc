@@ -13,10 +13,13 @@
   "sections": {
     "header": {
       "type": "header",
-      "settings": {}
+      "settings": {
+        "promo_text": "Frete grátis para todo o Brasil!",
+        "menu": ""
+      }
     }
   },
   "order": [
     "header"
-  ],
+  ]
 }
