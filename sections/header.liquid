@@ -2,7 +2,7 @@
 
   <!-- Barra Superior (promo/frete/localização) -->
   <div class="header__topbar">
-    <div class="container">
+    <div class="container-fluid">
       <span class="header__location">
         {{ 'icon-location.svg' | inline_asset_content }}
         {{ section.settings.promo_text }}
@@ -12,7 +12,7 @@
 
   <!-- Linha Principal: Logo + Busca + Ícones -->
   <div class="header__main">
-    <div class="container header__main-wrapper">
+    <div class="container-fluid header__main-wrapper">
 
       <!-- Logomarca -->
       <div class="header__logo">
@@ -66,7 +66,7 @@
 
   <!-- Menu Inferior -->
   <nav class="header__menu">
-    <div class="container">
+    <div class="container-fluid">
       <ul>
         <li class="menu-icon">{{ 'icon-menu.svg' | inline_asset_content }}</li>
         {% for link in section.settings.menu.links %}
@@ -82,6 +82,12 @@
 .site-header {
   font-family: inherit;
   color: white;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
 }
 
 /* Barra superior */
@@ -89,12 +95,15 @@
   background: #0a2a47;
   color: #fff;
   font-size: 0.85rem;
-  padding: 0.3rem 1rem;
+  padding: 0.3rem 0;
 }
-.header__topbar .container {
+.header__topbar .container-fluid {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
+  max-width: none;
+  padding: 0 1rem;
 }
 .header__location {
   display: flex;
@@ -109,13 +118,16 @@
 /* Linha principal */
 .header__main {
   background: #00264d;
-  padding: 0.8rem 1rem;
+  padding: 0.8rem 0;
 }
 .header__main-wrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  width: 100%;
+  max-width: none;
+  padding: 0 1rem;
 }
 .header__logo img {
   max-height: 50px;
@@ -184,9 +196,12 @@
   background: #00264d;
   border-top: 1px solid rgba(255,255,255,0.1);
 }
-.header__menu .container {
+.header__menu .container-fluid {
   display: flex;
   justify-content: center;
+  width: 100%;
+  max-width: none;
+  padding: 0 1rem;
 }
 .header__menu ul {
   list-style: none;
@@ -209,21 +224,25 @@
 @media (max-width: 768px) {
   .header__main-wrapper {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    padding: 0 1rem;
   }
   .header__search {
     order: 2;
     width: 100%;
+    padding: 0.5rem 0;
   }
   .header__icons {
     order: 3;
-    justify-content: flex-end;
+    justify-content: space-between;
     width: 100%;
+    padding: 0 0 0.5rem 0;
   }
   .header__menu ul {
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
+    padding: 0.8rem 1rem;
   }
 }
 {% endstylesheet %}
