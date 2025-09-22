@@ -18,10 +18,10 @@
       <div class="header__logo">
         {% if section.settings.logo != blank %}
           <a href="{{ routes.root_url }}">
-            <img src="{{ section.settings.logo | img_url: '200x' }}" alt="{{ shop.name }}">
+            <img src="{{ section.settings.logo | img_url: '300x' }}" alt="{{ shop.name }}" style="max-height: {{ section.settings.logo_size }}px;">
           </a>
         {% else %}
-          <h1>{{ shop.name | link_to: routes.root_url }}</h1>
+          <h1 style="font-size: {{ section.settings.logo_size }}px;">{{ shop.name | link_to: routes.root_url }}</h1>
         {% endif %}
       </div>
 
@@ -100,7 +100,7 @@
 .header__topbar .container-fluid {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: {{ section.settings.location_position }};
   width: 100%;
   max-width: none;
   padding: 0 1rem;
@@ -130,7 +130,7 @@
   padding: 0 1rem;
 }
 .header__logo img {
-  max-height: 50px;
+  max-height: var(--logo-height);
 }
 
 /* Busca */
@@ -244,6 +244,9 @@
     justify-content: center;
     padding: 0.8rem 1rem;
   }
+  .header__topbar .container-fluid {
+    justify-content: {{ section.settings.location_position_mobile }};
+  }
 }
 {% endstylesheet %}
 
@@ -257,10 +260,42 @@
       "label": "Logomarca"
     },
     {
+      "type": "range",
+      "id": "logo_size",
+      "label": "Tamanho da Logomarca",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "default": 50,
+      "unit": "px"
+    },
+    {
       "type": "text",
       "id": "promo_text",
       "label": "Texto da barra superior",
       "default": "Frete grátis para todo o Brasil!"
+    },
+    {
+      "type": "select",
+      "id": "location_position",
+      "label": "Posição da localização na área superior",
+      "options": [
+        { "value": "flex-start", "label": "Esquerda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "flex-end", "label": "Direita" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "location_position_mobile",
+      "label": "Posição da localização no mobile",
+      "options": [
+        { "value": "flex-start", "label": "Esquerda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "flex-end", "label": "Direita" }
+      ],
+      "default": "center"
     },
     {
       "type": "link_list",
