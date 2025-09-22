@@ -14,7 +14,11 @@
     "header": {
       "type": "header",
       "settings": {
+        "logo": "shopify://shop_images/LOGOMARCAS_10.png",
+        "logo_size": 100,
         "promo_text": "Frete grátis para todo o Brasil!",
+        "location_position": "center",
+        "location_position_mobile": "center",
         "menu": ""
       }
     }
